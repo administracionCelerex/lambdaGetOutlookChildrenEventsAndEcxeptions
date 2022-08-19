@@ -26,6 +26,7 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
   const ALL_PARAMETERS_ARE_NEEDED = "ALL_PARAMETERS_ARE_NEEDED";
   const CRITICAL_ERROR = "CRITICAL_ERROR";
   const NO_USER_WAS_FOUND_IN_DB = "NO_USER_WAS_FOUND_IN_DB";
+  const NO_QUERY_PARAMS = "NO_QUERY_PARAMS";
 
   const responseObj: responseFull = {
     children: [],
@@ -33,22 +34,25 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
     error: { isError: true, msg: "" },
   };
   const queryParams = event.queryStringParameters;
+
+  if (!queryParams) {
+    console.log(NO_QUERY_PARAMS);
+    responseObj.error.msg = NO_QUERY_PARAMS;
+    return formatJSONResponseError({
+      responseObj,
+    });
+  }
+
   const mongoServer = process.env.MONGOSERVER;
   const mongoDBName = process.env.MONGODBNAME;
 
   const { email, idFather, startDateTime, endDateTime, pageSize } = queryParams;
-  /* const idFather =
-    "AQMkADAwATMwMAItNDdlZQAtNGNjAS0wMAItMDAKAEYAAAPJSF6JHgzGR7ZKq6xPKg0oBwDVR8q3f5wGS5opBpMMe4EJAAACAQ0AAADVR8q3f5wGS5opBpMMe4EJAAAAiHjXdwAAAA=="; */
-
-  /* const startDateTime = "2022-08-22T09:00:00.0000000";
-  const endDateTime = "2022-08-30T09:00:00.0000000"; */
 
   if (!email || !idFather || !startDateTime || !endDateTime) {
     console.log(ALL_PARAMETERS_ARE_NEEDED);
 
     responseObj.error.msg = ALL_PARAMETERS_ARE_NEEDED;
     return formatJSONResponseError({
-      /* message: `Hello ${event.body.name}, welcome to the exciting Serverless world!`, */
       responseObj,
     });
   }
@@ -65,7 +69,6 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
 
       responseObj.error.msg = NO_USER_WAS_FOUND_IN_DB + " " + email;
       return formatJSONResponseError({
-        /* message: `Hello ${event.body.name}, welcome to the exciting Serverless world!`, */
         responseObj,
       });
     }
@@ -97,28 +100,24 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
     ]);
 
     /* console.log(childrenSiblings); */
-    console.log(childrenSiblings.length);
 
     const childrenEcxeptions: EventZoho[] = getChildrenEcxeptions([
       ...childrenEventsInstances,
     ]);
 
     /* console.log(childrenEcxeptions); */
-    console.log(childrenEcxeptions.length);
 
     responseObj.children = childrenSiblings;
     responseObj.childrenEcxeptions = childrenEcxeptions;
     responseObj.error.isError = false;
 
     return formatJSONResponse({
-      /* message: `Hello ${event.body.name}, welcome to the exciting Serverless world!`, */
       responseObj,
     });
   } catch (err) {
     responseObj.error.msg = CRITICAL_ERROR + " " + err;
     console.log(CRITICAL_ERROR + err);
     return formatJSONResponseError({
-      /* message: `Hello ${event.body.name}, welcome to the exciting Serverless world!`, */
       responseObj,
     });
   }
