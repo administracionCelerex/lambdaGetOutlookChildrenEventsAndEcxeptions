@@ -4,13 +4,6 @@ import {
 } from "@libs/api-gateway";
 import { formatJSONResponse } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
-import {
-  AuthProvider,
-  AuthProviderCallback,
-  Client,
-  ClientOptions,
-  Options,
-} from "@microsoft/microsoft-graph-client";
 
 import { mongoose } from "@typegoose/typegoose";
 import schema from "./schema";
@@ -18,8 +11,12 @@ import "isomorphic-fetch";
 import { userOutlookSubscritionsMoodel } from "./models/OutlookAuth";
 import { Event, InstanceEvents } from "./interfaces/outlook";
 import { responseFull } from "./interfaces/responses";
-import { EventChildren } from "./interfaces/zoho";
-import { getChildrenSiblings } from "./controllers/children";
+import { EventChildren, EventZoho } from "./interfaces/zoho";
+import {
+  getChildrenEcxeptions,
+  getChildrenSiblings,
+} from "./controllers/children";
+import { getAllInstances } from "./controllers/outlook";
 
 require("dotenv").config();
 
@@ -75,39 +72,46 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
 
     const { email: emailUser, token } = user;
 
-    const authProvider: AuthProvider = (callback: AuthProviderCallback) => {
-      const error = "";
-      const accessToken = token;
-      callback(error, accessToken);
+    const paramsToMakeTheApiCall = {
+      idFather,
+      startDateTime,
+      endDateTime,
     };
 
-    let options: Options = {
-      authProvider: authProvider,
-    };
-
-    const client = Client.init(options);
-    const instancesOfEvent: InstanceEvents = (await client
-      .api(
-        `https://graph.microsoft.com/v1.0/me/events/${idFather}/instances?startDateTime=${startDateTime}&endDateTime=${endDateTime}`
-      )
-      .get()) as InstanceEvents;
+    const instancesOfEvent = await getAllInstances(
+      token,
+      paramsToMakeTheApiCall
+    );
 
     const { value: childrenEventsInstances } = instancesOfEvent;
+
     console.log(childrenEventsInstances);
 
     if (childrenEventsInstances.length == 0) {
       console.log("Ya no hay eventos");
     }
 
-    const childrenSiblings: EventChildren[] = getChildrenSiblings(
-      childrenEventsInstances
-    );
+    const childrenSiblings: EventChildren[] = getChildrenSiblings([
+      ...childrenEventsInstances,
+    ]);
 
-    console.log(childrenSiblings);
+    /* console.log(childrenSiblings); */
+    console.log(childrenSiblings.length);
+
+    const childrenEcxeptions: EventZoho[] = getChildrenEcxeptions([
+      ...childrenEventsInstances,
+    ]);
+
+    /* console.log(childrenEcxeptions); */
+    console.log(childrenEcxeptions.length);
+
+    responseObj.children = childrenSiblings;
+    responseObj.childrenEcxeptions = childrenEcxeptions;
+    responseObj.error.isError = false;
 
     return formatJSONResponse({
       /* message: `Hello ${event.body.name}, welcome to the exciting Serverless world!`, */
-      event,
+      responseObj,
     });
   } catch (err) {
     responseObj.error.msg = CRITICAL_ERROR + " " + err;
