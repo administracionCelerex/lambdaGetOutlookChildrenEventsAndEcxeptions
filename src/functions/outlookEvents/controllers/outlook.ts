@@ -9,7 +9,7 @@ import { InstanceEvents } from "../interfaces/outlook";
 
 export const getAllInstances = async (
   token: string,
-  { idFather, startDateTime, endDateTime }
+  { idFather, startDateTime, endDateTime, pageSize }
 ): Promise<InstanceEvents> => {
   try {
     const authProvider: AuthProvider = (callback: AuthProviderCallback) => {
@@ -25,7 +25,7 @@ export const getAllInstances = async (
     const client = Client.init(options);
     const instancesOfEvent: InstanceEvents = (await client
       .api(
-        `https://graph.microsoft.com/v1.0/me/events/${idFather}/instances?startDateTime=${startDateTime}&endDateTime=${endDateTime}&$top=5`
+        `https://graph.microsoft.com/v1.0/me/events/${idFather}/instances?startDateTime=${startDateTime}&endDateTime=${endDateTime}&$top=${pageSize}`
       )
       .get()) as InstanceEvents;
 

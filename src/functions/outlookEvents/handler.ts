@@ -36,7 +36,7 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
   const mongoServer = process.env.MONGOSERVER;
   const mongoDBName = process.env.MONGODBNAME;
 
-  const { email, idFather, startDateTime, endDateTime } = queryParams;
+  const { email, idFather, startDateTime, endDateTime, pageSize } = queryParams;
   /* const idFather =
     "AQMkADAwATMwMAItNDdlZQAtNGNjAS0wMAItMDAKAEYAAAPJSF6JHgzGR7ZKq6xPKg0oBwDVR8q3f5wGS5opBpMMe4EJAAACAQ0AAADVR8q3f5wGS5opBpMMe4EJAAAAiHjXdwAAAA=="; */
 
@@ -76,6 +76,7 @@ const outlookEvents: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
       idFather,
       startDateTime,
       endDateTime,
+      pageSize: pageSize ? +pageSize : 5,
     };
 
     const instancesOfEvent = await getAllInstances(
