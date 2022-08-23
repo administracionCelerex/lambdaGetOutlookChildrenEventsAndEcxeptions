@@ -19,4 +19,6 @@ export interface EventZoho {
 export interface EventChildren {
   childrenId: string;
   occurrneceId: string;
+  startTimeUtc: string;
+  endTimeUtc: string;
 }

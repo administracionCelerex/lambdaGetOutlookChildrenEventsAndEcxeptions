@@ -9,10 +9,14 @@ export const getChildrenSiblings = (
     (childEventInsta) => childEventInsta.type === "occurrence"
   );
   const childrenSiblings: EventChildren[] = childrenOcurrences.map((child) => {
-    const { occurrenceId, seriesMasterId, id } = child;
+    const { occurrenceId, seriesMasterId, id, start, end } = child;
+    const startTimeUtc = start.dateTime;
+    const endUtc = end.dateTime;
     const eventChild: EventChildren = {
       childrenId: id,
       occurrneceId: occurrenceId,
+      startTimeUtc: startTimeUtc,
+      endTimeUtc: endUtc,
     };
 
     return eventChild;
