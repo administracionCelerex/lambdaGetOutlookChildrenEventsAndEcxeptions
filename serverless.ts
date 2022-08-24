@@ -4,7 +4,7 @@ import type { AWS } from "@serverless/typescript";
 import outlookEvents from "@functions/outlookEvents";
 
 const serverlessConfiguration: AWS = {
-  service: "getChildrenEventsOutlookByDateAndEcxeptions",
+  service: "getChildrenEventsOutlook",
   frameworkVersion: "3",
   plugins: ["serverless-esbuild", "serverless-offline"],
   provider: {
